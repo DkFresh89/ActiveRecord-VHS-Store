@@ -1,6 +1,6 @@
 class Rental < ActiveRecord::Base
 
-    belongs_to :clients
+    belongs_to :client
     belongs_to :vhs
     # Rental#due_date - returns a date one week from when the record was created
     def due_date 
@@ -10,7 +10,8 @@ class Rental < ActiveRecord::Base
 
     #Helper Method for past_due_date
     def past_due?
-        self.current == true && self.due_date < DateTime.now
+        # binding.pry 
+        self.created_at < self.updated_at
     end
     #2nd Helper Method for past_due_date
     def returned_late?

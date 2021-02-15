@@ -6,11 +6,20 @@ class Vhs < ActiveRecord::Base
     has_many :clients, through: :rentals 
 
 
+    def is_available_to_rent?
+        Rental.find_by(vhs_id: self.id, current: false)
+    end
 
+    #returns a list of all genres available at the store
+    def self.all_genres
 
+    end 
+
+    def self.available_now
+        active_tapes = Rental.where(current: true).map(&:vhs)
+        remaining_tapes = self.all.select{|tape| !active_tapes.include?(tape)}
+    end
     
-
-
 
     private
 

@@ -13,9 +13,27 @@ class Movie < ActiveRecord::Base
     end 
 
     def self.available_now
-        # binding.pry 
-        Rental.all.select {|r| r.current == false}
-    end 
+        Vhs.available_now.map(&:movie).uniq
+    end
+
+    #number of rentals each movie's copy has
+    def number_of_rentals
+        #calling vhs on the instance of movie
+        #returns number of copies in store 
+        self.vhs.sum{|vhs| vhs.rentals.count}
+    end
+
+    #instance method calling on each instance of movie 
+    def number_of_clients
+        self.vhs.sum{|vhs| vhs.clients.count}
+    end
+
+    #Using instance method number_of_clients on an instance of a movie.
+    #Max_by enumerable to iterate over all movie instances and apply the block on each instance
+    #Returns the most clients of that movie instance
+    def self.most_clients
+        self.all.max_by{|movie| movie.number_of_clients}
+    end
 
 
 end
