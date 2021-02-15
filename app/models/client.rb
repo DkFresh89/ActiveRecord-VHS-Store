@@ -28,11 +28,84 @@ class Client < ActiveRecord::Base
     #returns a list of top 5 most active clients (i.e. those who had the most non-current / returned rentals)
 
     def self.most_active
-        binding.pry 
-        Rental.all.select {|r| r.client_id == self}
+      
+        self.all.sort_by{|client| client.num_rentals}.reverse[0..4]
+
+    end 
+    #helper method
+    def num_rentals
+
+        self.rentals.size
+
+    end 
+
+    # returns an instance who has spent most money at the store; one rental is $5,35 upfront (bonus: additional $12 charge for every late return — do not count those that have not yet been returned)
+
+
+    def rental_fees
+
+        (self.rentals.count * 5.35).round(2)
+
+    end 
+
+    def late_fees
+
+        self.rentals.count{|rental| rental.returned_late?} * 12
+
+    end 
+
+    def total_paid
+
+        self.rental_fees + self.late_fees
+
     end 
 
 
+    def self.paid_most
+
+    self.all.max_by{|client| client.total_paid}
+
+    end 
+
+    # returns an Integer of all movies watched by the all clients combined (assume that a rented movie is a watched movie)
+
+    def self.total_watch_time
+
+        Rental.all.sum{|rental| rental.vhs.movie.length}
+
+    end
+
+
+    def return_one(vhs)
+
+       rental = Rental.find_by(vhs_id: vhs.id, client_id: self.id, current: true)
+       rental.update(current: false)
+
+    end 
+
+    def all_active_rentals
+
+        # self.rentals.select{|rental| rental.current == true}
+        #AR Method
+        Rental.where(client_id: self.id, current: true)
+
+    end 
+
+    def return_all 
+        #you can call an AR method on an array
+        # self.all_active_rentals.update(current: false)
+
+
+        self.rentals.update_all(current: false)
+        
+    end 
+
+    def last_return
+
+        self.return_all
+        self.destroy
+
+    end 
    
 
 end
